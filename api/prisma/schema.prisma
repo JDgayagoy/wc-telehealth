@@ -16,5 +16,49 @@ model User {
   email     String   @unique
   password  String
   role      Role
+
+  profile   Profile?
+  medical   MedicalHistory[]
+  stats     PhysicalStat[]
+
+  createdAt DateTime @default(now())
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  firstName String
+  lastName  String
+  birthday  DateTime
+  contactNumber String
+
+  profilePictureUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PhysicalStat {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  weight    Float
+  height    Float
+  recordedAt DateTime @default(now())
+}
+
+model MedicalHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  condition String
+  description String?
+  isActive  Boolean @default(true)
+  diagnosedAt DateTime?
+
   createdAt DateTime @default(now())
 }
