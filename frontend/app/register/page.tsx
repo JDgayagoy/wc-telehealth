@@ -13,6 +13,10 @@ import { Card, CardContent } from "@/components/ui/card";
 const registerSchema = z.object({
     email: z.email(),
     password: z.string().min(6),
+    firstName: z.string(),
+    lastName: z.string(),
+    contactNumber: z.string(),
+    birthday: z.coerce.date(),
     role: z.enum(['PATIENT', 'DOCTOR']),
 });
 
@@ -26,7 +30,7 @@ export default function RegisterPage() {
         handleSubmit,
         formState: { errors, isSubmitting },
     } = useForm<RegisterFormValues>({
-        resolver: zodResolver(registerSchema),
+        resolver: zodResolver(registerSchema) as any,
     });
 
     const onSubmit = async (data: RegisterFormValues) => {
@@ -68,6 +72,48 @@ export default function RegisterPage() {
 
                         <div>
                             <Input
+                                placeholder="First name"
+                                type="text"
+                                {...register('firstName')}
+                            />
+
+                            {errors.firstName && (
+                                <p className="text-sm text-red-500">
+                                    {errors.firstName.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <Input
+                                placeholder="Last name"
+                                type="text"
+                                {...register('lastName')}
+                            />
+
+                            {errors.lastName && (
+                                <p className="text-sm text-red-500">
+                                    {errors.lastName.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <Input
+                                placeholder="Contact Number"
+                                type="text"
+                                {...register('contactNumber')}
+                            />
+
+                            {errors.contactNumber && (
+                                <p className="text-sm text-red-500">
+                                    {errors.contactNumber.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <Input
                                 placeholder="Password"
                                 type="password"
                                 {...register('password')}
@@ -75,6 +121,19 @@ export default function RegisterPage() {
                             {errors.password && (
                                 <p className="text-sm text-red-500">
                                     {errors.password.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <Input
+                                placeholder="Birthday"
+                                type="date"
+                                {...register('birthday')}
+                            />
+                            {errors.birthday && (
+                                <p className="text-sm text-red-500">
+                                    {errors.birthday.message}
                                 </p>
                             )}
                         </div>

@@ -1,8 +1,14 @@
-import { IsEmail, IsEnum, IsString, MinLength } from "class-validator";
+import {
+    IsDateString,
+    IsEmail,
+    IsEnum,
+    IsString,
+    MinLength,
+} from 'class-validator';
 
 export enum Role {
     PATIENT = 'PATIENT',
-    DOCTOR = 'DOCTOR'
+    DOCTOR = 'DOCTOR',
 }
 
 export class RegisterDto {
@@ -10,8 +16,20 @@ export class RegisterDto {
     email: string;
 
     @IsString()
-    @MinLength(6, { message: "Password must be atleast 6 characters" })
+    @MinLength(6)
     password: string;
+
+    @IsString()
+    firstName: string;
+
+    @IsString()
+    lastName: string;
+
+    @IsString()
+    contactNumber: string;
+
+    @IsDateString()
+    birthday: string;
 
     @IsEnum(Role)
     role: Role;

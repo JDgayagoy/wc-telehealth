@@ -10,12 +10,14 @@ import * as bcrypt from "bcrypt";
 import { UsersService } from "../users/users.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/dto";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private prisma: PrismaService,
     ) { }
 
     async register(dto: RegisterDto) {
@@ -32,6 +34,16 @@ export class AuthService {
             password: hashedPassword,
             role: dto.role,
         });
+
+        await this.prisma.profile.create({
+            data: {
+                userId: user.id,
+                firstName: dto.firstName,
+                lastName: dto.lastName,
+                contactNumber: dto.contactNumber,
+                birthday: dto.birthday
+            }
+        })
 
         return {
             message: 'User created',

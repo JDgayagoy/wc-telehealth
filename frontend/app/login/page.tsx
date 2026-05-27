@@ -30,10 +30,12 @@ export default function LoginPage() {
 
     const onSubmit = async (data: LoginFormValues) => {
         try {
+            console.log('Login attempt with:', data);
             const response = await axios.post('http://localhost:3001/auth/login', data);
 
             localStorage.setItem('access_token', response.data.access_token);
 
+            console.log('API Response:', response.data);
             alert('Login Successfully');
 
             if (response.data.user.role === 'DOCTOR') {
@@ -41,9 +43,8 @@ export default function LoginPage() {
             } else {
                 router.push('/dashboard/patient')
             }
-        } catch (error) {
-            console.error('Login Failed', error);
-            alert('Login Failed')
+        } catch (error: any) {
+            console.log(error.response?.data);
         }
     };
     return (
