@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import axios from '@/lib/axios'; // your configured axios instance
+import axios from '@/lib/axios';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { useRouter } from 'next/navigation';
 import { Sparkles, Search, Calendar, User } from 'lucide-react';
+import BookingModal from '@/components/booking/BookingModal';
 
 interface Doctor {
   id: string;
@@ -18,13 +18,13 @@ interface Doctor {
 }
 
 export default function DoctorDiscoveryPage() {
-  const router = useRouter();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [search, setSearch] = useState('');
   const [symptoms, setSymptoms] = useState('');
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [recommendedSpecs, setRecommendedSpecs] = useState<string[]>([]);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null); // 👈 added
 
   const fetchDoctors = async (specialization?: string) => {
     setLoading(true);
@@ -135,14 +135,16 @@ export default function DoctorDiscoveryPage() {
                       <span className="text-xs text-green-600 font-medium">
                         {doc.consultationSlots?.length ?? 0} slots available
                       </span>
+                      {/* 👇 only change here — was router.push */}
                       <Button
                         size="sm"
-                        onClick={() => router.push(`/dashboard/patient/doctors/${doc.id}/book`)}
+                        onClick={() => setSelectedDoctor(doc)}
                         disabled={!doc.consultationSlots?.length}
                       >
                         <Calendar size={14} className="mr-1" />
                         Book
                       </Button>
+
                     </div>
                   </div>
                 </div>
@@ -151,6 +153,16 @@ export default function DoctorDiscoveryPage() {
           ))}
         </div>
       )}
+
+      {/* 👇 Modal — sits outside the grid, renders on top */}
+      <BookingModal
+        doctor={selectedDoctor}
+        onClose={() => setSelectedDoctor(null)}
+        onBooked={() => {
+          setSelectedDoctor(null);
+          fetchDoctors(); // refresh slot counts after booking
+        }}
+      />
     </div>
   );
 }
