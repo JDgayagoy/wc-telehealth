@@ -12,10 +12,10 @@ import { ConsultationsModule } from './consultations/consultations.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
-
+import { AiModule } from './ai/ai.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, DoctorsModule, PatientsModule, AppointmentsModule, SchedulesModule, PrescriptionsModule, ConsultationsModule, NotificationsModule, PrismaModule, ProfileModule],
+  imports: [AuthModule, UsersModule, DoctorsModule, PatientsModule, AppointmentsModule, SchedulesModule, PrescriptionsModule, ConsultationsModule, NotificationsModule, PrismaModule, ProfileModule, AiModule],
   controllers: [AppController],
   providers: [AppService],
 })

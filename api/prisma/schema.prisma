@@ -22,6 +22,10 @@ model User {
   stats     PhysicalStat[]
 
   createdAt DateTime @default(now())
+  
+  doctorProfile     DoctorProfile?
+  consultationSlots ConsultationSlot[]
+  patientAppointments Appointment[] @relation("PatientAppointments")
 }
 
 model Profile {
@@ -61,4 +65,59 @@ model MedicalHistory {
   diagnosedAt DateTime?
 
   createdAt DateTime @default(now())
+}
+
+model DoctorProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  specialization String
+  bio String
+  licenseNumber String
+  yearsOfExperience Int
+
+  profilePictureUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model ConsultationSlot {
+  id          String   @id @default(uuid())
+  doctorId    String
+  doctor      User     @relation(fields: [doctorId], references: [id])
+
+  startTime   DateTime
+  endTime     DateTime
+  isAvailable Boolean  @default(true)
+
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   User     @relation("PatientAppointments", fields: [patientId], references: [id])
+
+  slotId    String
+  slot      ConsultationSlot @relation(fields: [slotId], references: [id])
+
+  status    AppointmentStatus @default(PENDING)
+  reason    String?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  RESCHEDULED
 }
