@@ -4,6 +4,8 @@ import {
     IsEnum,
     IsString,
     MinLength,
+    IsOptional,
+    IsNumber
 } from 'class-validator';
 
 export enum Role {
@@ -33,4 +35,20 @@ export class RegisterDto {
 
     @IsEnum(Role)
     role: Role;
+
+    @IsOptional()
+    @IsString()
+    specialization?: string;
+
+    @IsOptional()
+    @IsString()
+    bio?: string;
+
+    @IsOptional()
+    @IsNumber()
+    yearsOfExperience?: number;
+
+    @IsOptional()
+    @IsString()
+    licenseNumber?: string;
 }

@@ -45,6 +45,18 @@ export class AuthService {
             }
         })
 
+        if (dto.role === 'DOCTOR') {
+            await this.prisma.doctorProfile.create({
+                data: {
+                    userId: user.id,
+                    specialization: dto.specialization || '',
+                    bio: dto.bio || '',
+                    yearsOfExperience: dto.yearsOfExperience || 0,
+                    licenseNumber: dto.licenseNumber || '',
+                }
+            })
+        }
+
         return {
             message: 'User created',
             user,

@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -161,6 +162,9 @@ export default function RegisterPage() {
                         >
                             {isSubmitting ? 'Creating account...' : 'Register'}
                         </Button>
+                        <div className="text-center text-sm text-muted-foreground mt-4">
+                            Are you a doctor? <Link href="/register/doctor" className="text-blue-600 hover:underline">Register here</Link>
+                        </div>
                     </form>
                 </CardContent>
             </Card>
