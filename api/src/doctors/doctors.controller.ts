@@ -21,4 +21,6 @@ export class DoctorsController {
     getSlots(@Param('id') id: string) {
         return this.doctorsService.getSlots(id);
     }
+
+
 }

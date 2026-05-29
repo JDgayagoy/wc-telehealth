@@ -4,7 +4,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async book(patientId: string, dto: CreateAppointmentDto) {
     const slot = await this.prisma.consultationSlot.findUnique({
@@ -13,7 +13,7 @@ export class AppointmentsService {
 
     if (!slot) throw new NotFoundException('Slot not found');
     if (!slot.isAvailable) throw new BadRequestException('Slot is no longer available');
-
+    console.log('PATIENT ID:', patientId);
     const [appointment] = await this.prisma.$transaction([
       this.prisma.appointment.create({
         data: {
@@ -71,5 +71,38 @@ export class AppointmentsService {
         data: { isAvailable: true },
       }),
     ]);
+  }
+
+  async getDoctorAppointments(doctorId: string) {
+    return this.prisma.appointment.findMany({
+      where: {
+        slot: { doctorId },
+      },
+      include: {
+        slot: true,
+        patient: {
+          select: {
+            id: true,
+            profile: { select: { firstName: true, lastName: true, birthday: true, profilePictureUrl: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getAppointmentById(appointmentId: string) {
+    return this.prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: {
+        slot: true,
+        patient: {
+          select: {
+            id: true,
+            profile: { select: { firstName: true, lastName: true, birthday: true, contactNumber: true, profilePictureUrl: true } },
+          },
+        },
+      },
+    });
   }
 }

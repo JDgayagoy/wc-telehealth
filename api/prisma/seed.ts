@@ -41,6 +41,71 @@ async function generateSlots(doctorId: string) {
     console.log(`✅ Created ${slots.length} slots for doctor ${doctorId}`);
 }
 
+async function generatePatientData() {
+    const patients = await prisma.user.findMany({
+        where: { role: 'PATIENT' },
+    });
+
+    const doctors = await prisma.user.findMany({
+        where: { role: 'DOCTOR' },
+    });
+
+    if (patients.length === 0 || doctors.length === 0) {
+        console.log('⏭️  Skipping patient data seeding: need at least 1 patient and 1 doctor');
+        return;
+    }
+
+    const doctorId = doctors[0].id;
+
+    for (const patient of patients) {
+        const patientId = patient.id;
+
+        // Medical History
+        const historyCount = await prisma.medicalHistory.count({ where: { userId: patientId } });
+        if (historyCount === 0) {
+            await prisma.medicalHistory.create({
+                data: {
+                    userId: patientId,
+                    condition: 'Hypertension',
+                    description: 'Diagnosed with high blood pressure during routine checkup.',
+                    isActive: true,
+                    diagnosedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), // 1 year ago
+                }
+            });
+        }
+
+        // Medical Record
+        const recordCount = await prisma.medicalRecord.count({ where: { patientId } });
+        if (recordCount === 0) {
+            await prisma.medicalRecord.create({
+                data: {
+                    patientId,
+                    doctorId,
+                    diagnosis: 'Essential Hypertension',
+                    treatment: 'Prescribed Amlodipine 5mg. Advised low sodium diet.',
+                    consultationNotes: 'Patient reports occasional headaches. BP 140/90.',
+                }
+            });
+        }
+
+        // Prescription
+        const prescriptionCount = await prisma.prescription.count({ where: { patientId } });
+        if (prescriptionCount === 0) {
+            await prisma.prescription.create({
+                data: {
+                    patientId,
+                    doctorId,
+                    medication: 'Amlodipine',
+                    dosage: '5mg',
+                    instructions: 'Take 1 tablet daily in the morning after meals.',
+                }
+            });
+        }
+        
+        console.log(`✅ Seeded history, records, and prescriptions for patient ${patientId}`);
+    }
+}
+
 async function main() {
     const doctors = await prisma.user.findMany({
         where: { role: 'DOCTOR' },
@@ -70,6 +135,9 @@ async function main() {
         await generateSlots(doctor.id);
         console.log(`👨‍⚕️  Dr. ${doctor.profile?.firstName} ${doctor.profile?.lastName} — done`);
     }
+
+    console.log('Generating patient data...');
+    await generatePatientData();
 
     console.log('🎉 Seeding complete!');
 }

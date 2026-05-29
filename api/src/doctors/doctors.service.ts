@@ -42,9 +42,11 @@ export class DoctorsService {
         return this.prisma.user.findMany({
             where: {
                 role: 'DOCTOR',
-                doctorProfile: specialization
-                    ? { specialization: { contains: specialization, mode: 'insensitive' } }
-                    : { isNot: null },
+                ...(specialization && {
+                    doctorProfile: {
+                        specialization: { contains: specialization, mode: 'insensitive' },
+                    },
+                }),
             },
             select: {
                 id: true,
@@ -61,7 +63,6 @@ export class DoctorsService {
                 consultationSlots: {
                     where: { isAvailable: true, startTime: { gte: new Date() } },
                     orderBy: { startTime: 'asc' },
-                    take: 5,
                 },
             },
         });

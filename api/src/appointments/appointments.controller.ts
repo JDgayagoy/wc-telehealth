@@ -18,8 +18,21 @@ export class AppointmentsController {
     return this.appointmentsService.getMyAppointments(req.user.id);
   }
 
+  // Doctor: get all appointments where doctor = logged in user
+  @Get('doctor')
+  getDoctorAppointments(@Req() req) {
+    return this.appointmentsService.getDoctorAppointments(req.user.id);
+  }
+
+  // Doctor: get full appointment details with patient info
+  @Get(':id')
+  getAppointmentById(@Param('id') id: string) {
+    return this.appointmentsService.getAppointmentById(id);
+  }
+
   @Patch(':id/cancel')
   cancel(@Param('id') id: string, @Req() req) {
     return this.appointmentsService.cancel(id, req.user.id);
   }
 }
+

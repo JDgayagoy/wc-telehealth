@@ -26,6 +26,11 @@ model User {
   doctorProfile     DoctorProfile?
   consultationSlots ConsultationSlot[]
   patientAppointments Appointment[] @relation("PatientAppointments")
+
+  patientMedicalRecords MedicalRecord[] @relation("PatientMedicalRecords")
+  doctorMedicalRecords  MedicalRecord[] @relation("DoctorMedicalRecords")
+  patientPrescriptions  Prescription[]  @relation("PatientPrescriptions")
+  doctorPrescriptions   Prescription[]  @relation("DoctorPrescriptions")
 }
 
 model Profile {
@@ -120,4 +125,32 @@ enum AppointmentStatus {
   CANCELLED
   COMPLETED
   RESCHEDULED
+}
+
+model MedicalRecord {
+  id                String   @id @default(uuid())
+  patientId         String
+  patient           User     @relation("PatientMedicalRecords", fields: [patientId], references: [id])
+  doctorId          String
+  doctor            User     @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
+
+  diagnosis         String
+  treatment         String?
+  consultationNotes String?
+
+  createdAt         DateTime @default(now())
+}
+
+model Prescription {
+  id           String   @id @default(uuid())
+  patientId    String
+  patient      User     @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  doctorId     String
+  doctor       User     @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+
+  medication   String
+  dosage       String
+  instructions String
+
+  createdAt    DateTime @default(now())
 }
