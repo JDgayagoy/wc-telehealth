@@ -14,6 +14,12 @@ export class PrescriptionsController {
         return this.prescriptionsService.create(req.user.id, dto);
     }
 
+    // Doctor issues multiple prescriptions
+    @Post('batch')
+    batchCreate(@Req() req, @Body() dtos: CreatePrescriptionDto[]) {
+        return this.prescriptionsService.batchCreate(req.user.id, dtos);
+    }
+
     // Doctor views all prescriptions they issued
     @Get('mine')
     findByDoctor(@Req() req) {
