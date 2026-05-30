@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import axios from '@/lib/axios';
 import { Pill, Plus, Trash2 } from 'lucide-react';
@@ -36,7 +37,7 @@ export function PrescriptionPanel({ appointmentId, patientId, onClose }: Prescri
 
     const handleSubmit = async () => {
         const isValid = rxList.every(rx => rx.medication.trim() && rx.dosage.trim());
-        if (!isValid) return alert('Medication Name and Dosage are required for all entries.');
+        if (!isValid) toast.error('Medication Name and Dosage are required for all entries.'); return;
 
         setSubmitting(true);
         try {
@@ -53,12 +54,12 @@ export function PrescriptionPanel({ appointmentId, patientId, onClose }: Prescri
             }));
 
             await axios.post('/prescriptions/batch', dtos);
-            alert('Prescriptions added successfully');
+            toast.success('Prescriptions added successfully');
             setRxList([{ medication: '', dosage: '', frequency: '', duration: '', notes: '' }]);
             onClose(); // Optional: close panel on success
         } catch (e) {
             console.error(e);
-            alert('Failed to add prescriptions');
+            toast.error('Failed to add prescriptions');
         } finally {
             setSubmitting(false);
         }

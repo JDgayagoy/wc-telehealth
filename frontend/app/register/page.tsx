@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { toast } from 'sonner';
 import axios from "axios";
@@ -82,7 +82,7 @@ export default function RegisterPage() {
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
-                            <Input type="password" placeholder="••••••••" className="rounded-xl h-11" {...register('password')} />
+                            <Input type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" className="rounded-xl h-11" {...register('password')} />
                             {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
                         </div>
 
@@ -127,3 +127,4 @@ export default function RegisterPage() {
         </div>
     );
 }
+

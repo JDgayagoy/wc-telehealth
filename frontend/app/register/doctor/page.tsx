@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { toast } from 'sonner';
 import axios from "axios";
@@ -11,7 +11,11 @@ import { Input } from "@/components/ui/input";
 
 const registerSchema = z.object({
     email: z.email(),
-    password: z.string().min(6),
+    password: z.string()
+        .min(8, 'Password must be at least 8 characters')
+        .regex(/[a-z]/, 'Must contain a lowercase letter')
+        .regex(/[A-Z]/, 'Must contain an uppercase letter')
+        .regex(/[0-9]/, 'Must contain a number'),
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     contactNumber: z.string().min(1, "Contact number is required"),
@@ -81,7 +85,7 @@ export default function DoctorRegisterPage() {
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
-                            <Input type="password" placeholder="••••••••" className="rounded-xl h-11" {...register('password')} />
+                            <Input type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" className="rounded-xl h-11" {...register('password')} />
                             {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
                         </div>
 
@@ -126,3 +130,4 @@ export default function DoctorRegisterPage() {
         </div>
     );
 }
+
