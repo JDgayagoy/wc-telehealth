@@ -3,6 +3,7 @@
 import { toast } from 'sonner';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from '@/lib/axios';
+import { apiUrl } from '@/lib/api-url';
 import { format, differenceInYears } from 'date-fns';
 import {
     User, Phone, Edit2, X, Save, Stethoscope,
@@ -10,8 +11,6 @@ import {
     FileSignature, Fingerprint, Star, Briefcase, Plus, CalendarDays,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const GENDERS = ['Male', 'Female', 'Other'];
 
@@ -234,9 +233,9 @@ export default function DoctorProfilePage() {
     const dob = profile?.birthday ? format(new Date(profile.birthday), 'MMMM d, yyyy') : '—';
     const doctorId = profile?.userId ? profile.userId.slice(-8).toUpperCase() : '——';
     const picUrl = profile?.profilePictureUrl
-        ? (profile.profilePictureUrl.startsWith('/uploads') ? `${API_BASE}${profile.profilePictureUrl}` : profile.profilePictureUrl)
+        ? apiUrl(profile.profilePictureUrl)
         : null;
-    const sigUrl = doctorProfile?.signatureUrl ? `${API_BASE}${doctorProfile.signatureUrl}` : null;
+    const sigUrl = doctorProfile?.signatureUrl ? apiUrl(doctorProfile.signatureUrl) : null;
     const specs: string[] = Array.isArray(doctorProfile?.specialization) ? doctorProfile.specialization : [];
 
     return (
@@ -686,7 +685,7 @@ export default function DoctorProfilePage() {
                                         <div className="flex items-center gap-2.5">
                                             <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold shrink-0 overflow-hidden">
                                                 {r.patient?.profile?.profilePictureUrl
-                                                    ? <img src={r.patient.profile.profilePictureUrl.startsWith('/uploads') ? `${API_BASE}${r.patient.profile.profilePictureUrl}` : r.patient.profile.profilePictureUrl} alt="" className="w-full h-full object-cover" />
+                                                    ? <img src={apiUrl(r.patient.profile.profilePictureUrl)} alt="" className="w-full h-full object-cover" />
                                                     : initials}
                                             </div>
                                             <div>

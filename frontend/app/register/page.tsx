@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { toast } from 'sonner';
-import axios from "axios";
+import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -37,7 +37,7 @@ export default function RegisterPage() {
 
     const onSubmit = async (data: RegisterFormValues) => {
         try {
-            await axios.post('http://localhost:3001/auth/register', { ...data, role: 'PATIENT' });
+            await axios.post('/auth/register', { ...data, role: 'PATIENT' });
             toast.success('Account created successfully');
             router.push('/login');
         } catch (error: any) {

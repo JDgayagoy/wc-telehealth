@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode 
 import { usePathname } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import axios from '@/lib/axios';
+import { API_BASE_URL } from '@/lib/api-url';
 import { getRoleFromToken } from '@/lib/auth';
 
 interface Notification {
@@ -78,7 +79,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (!userId) return;
 
-        const newSocket = io('http://localhost:3001');
+        const newSocket = io(API_BASE_URL);
 
         newSocket.on('connect', () => {
             newSocket.emit('join', userId);

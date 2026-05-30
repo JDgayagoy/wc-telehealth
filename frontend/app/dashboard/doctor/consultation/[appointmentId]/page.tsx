@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from '@/lib/axios';
+import { apiUrl } from '@/lib/api-url';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import {
@@ -447,12 +448,12 @@ export default function DoctorConsultationPage() {
                                                     {req.result.fileType === 'image' ? (
                                                         <div className="relative">
                                                             <img
-                                                                src={`http://localhost:3001${req.result.fileUrl}`}
+                                                                src={apiUrl(req.result.fileUrl)}
                                                                 alt={req.result.fileName}
                                                                 className="w-full object-contain max-h-72 bg-gray-900"
                                                             />
                                                             <a
-                                                                href={`http://localhost:3001${req.result.fileUrl}`}
+                                                                href={apiUrl(req.result.fileUrl)}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-black/60 text-white text-[10px] rounded-lg hover:bg-black/80 transition-colors"
@@ -463,12 +464,12 @@ export default function DoctorConsultationPage() {
                                                     ) : (
                                                         <div className="flex flex-col">
                                                             <iframe
-                                                                src={`http://localhost:3001${req.result.fileUrl}`}
+                                                                src={apiUrl(req.result.fileUrl)}
                                                                 className="w-full h-64 border-0"
                                                                 title={req.result.fileName}
                                                             />
                                                             <a
-                                                                href={`http://localhost:3001${req.result.fileUrl}`}
+                                                                href={apiUrl(req.result.fileUrl)}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="flex items-center justify-center gap-1.5 py-2 bg-gray-50 text-blue-600 text-xs font-medium hover:bg-gray-100 transition-colors border-t border-gray-100"

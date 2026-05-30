@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from '@/lib/axios';
+import { API_BASE_URL } from '@/lib/api-url';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { io } from 'socket.io-client';
@@ -137,7 +138,7 @@ export default function PatientConsultationPage() {
 
     useEffect(() => {
         if (!userId) return;
-        const socket = io('http://localhost:3001');
+        const socket = io(API_BASE_URL);
         socket.on('connect', () => socket.emit('join', userId));
         socket.on('consultation:ended', (data: { appointmentId: string }) => {
             if (data.appointmentId === appointmentId) {

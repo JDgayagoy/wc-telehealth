@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useEffect, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import axios from '@/lib/axios';
+import { apiUrl } from '@/lib/api-url';
 import {
     format, differenceInYears, isAfter, isBefore, isToday, subMinutes,
     addDays, addWeeks, addMonths, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay,
@@ -356,7 +357,7 @@ function PatientHistoryModal({ appointment, onClose }: { appointment: Appointmen
                                             </div>
                                             {doctorSig ? (
                                                 <img
-                                                    src={`http://localhost:3001${doctorSig}`}
+                                                    src={apiUrl(doctorSig)}
                                                     alt="Doctor signature"
                                                     className="max-h-16 max-w-[180px] object-contain opacity-90"
                                                 />
@@ -643,7 +644,7 @@ function LabRequestModal({
                                                     {req.result && (
                                                         <div className="mt-2 flex items-center gap-2">
                                                             <a
-                                                                href={`http://localhost:3001${req.result.fileUrl}`}
+                                                                href={apiUrl(req.result.fileUrl)}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="flex items-center gap-1 text-xs text-blue-600 hover:underline font-medium"

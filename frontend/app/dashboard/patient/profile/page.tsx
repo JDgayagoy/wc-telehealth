@@ -3,6 +3,7 @@
 import { toast } from 'sonner';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from '@/lib/axios';
+import { apiUrl } from '@/lib/api-url';
 import { format, differenceInYears } from 'date-fns';
 import {
     User, Mail, Phone, MapPin, Download, Edit2, X, Save,
@@ -240,7 +241,7 @@ export default function PatientProfilePage() {
                         className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center cursor-pointer group"
                     >
                         {profile?.profilePictureUrl
-                            ? <img src={profile.profilePictureUrl.startsWith('/uploads') ? `http://localhost:3001${profile.profilePictureUrl}` : profile.profilePictureUrl} alt="" className="w-full h-full object-cover" />
+                            ? <img src={apiUrl(profile.profilePictureUrl)} alt="" className="w-full h-full object-cover" />
                             : <User size={52} className="text-gray-300" />}
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
                             {uploadingPicture

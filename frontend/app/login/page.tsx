@@ -1,6 +1,6 @@
 'use client';
 
-import axios from 'axios';
+import axios from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,7 +29,7 @@ export default function LoginPage() {
 
     const onSubmit = async (data: LoginFormValues) => {
         try {
-            const response = await axios.post('http://localhost:3001/auth/login', data);
+            const response = await axios.post('/auth/login', data);
             localStorage.setItem('access_token', response.data.access_token);
             if (response.data.user.role === 'DOCTOR') {
                 router.push('/dashboard/doctor');

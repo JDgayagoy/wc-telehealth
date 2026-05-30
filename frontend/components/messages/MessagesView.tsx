@@ -3,6 +3,7 @@
 import { toast } from 'sonner';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from '@/lib/axios';
+import { API_BASE_URL, apiUrl } from '@/lib/api-url';
 import { io, Socket } from 'socket.io-client';
 import { format, isToday, isYesterday } from 'date-fns';
 import { Send, Paperclip, MessageSquare, ExternalLink, XCircle, Lock, Inbox, Archive } from 'lucide-react';
@@ -99,7 +100,7 @@ export function MessagesView({
     // Socket connection
     useEffect(() => {
         if (!currentUserId) return;
-        const socket = io('http://localhost:3001');
+        const socket = io(API_BASE_URL);
         socketRef.current = socket;
         socket.on('connect', () => socket.emit('join', currentUserId));
         socket.on('message:new', (msg: Message) => {
@@ -342,15 +343,15 @@ export function MessagesView({
                                                         {msg.fileType === 'image' ? (
                                                             <div>
                                                                 <img
-                                                                    src={`http://localhost:3001${msg.fileUrl}`}
+                                                                    src={apiUrl(msg.fileUrl ?? '')}
                                                                     alt={msg.fileName}
                                                                     className="rounded-xl max-w-[200px] max-h-48 object-contain cursor-pointer"
-                                                                    onClick={() => window.open(`http://localhost:3001${msg.fileUrl}`, '_blank')}
+                                                                    onClick={() => window.open(apiUrl(msg.fileUrl ?? ''), '_blank')}
                                                                 />
                                                             </div>
                                                         ) : (
                                                             <a
-                                                                href={`http://localhost:3001${msg.fileUrl}`}
+                                                                href={apiUrl(msg.fileUrl ?? '')}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="flex items-center gap-2 hover:opacity-80"

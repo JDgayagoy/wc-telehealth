@@ -3,6 +3,7 @@
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import axios from '@/lib/axios';
+import { apiUrl } from '@/lib/api-url';
 import { format, isFuture, isAfter, subMinutes } from 'date-fns';
 import {
     Video, Calendar as CalendarIcon, Clock, User, X, RefreshCw,
@@ -380,7 +381,7 @@ export default function PatientAppointmentsPage() {
 
                                                         {req.result ? (
                                                             <a
-                                                                href={`http://localhost:3001${req.result.fileUrl}`}
+                                                                href={apiUrl(req.result.fileUrl)}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline font-medium"
