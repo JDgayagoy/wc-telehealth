@@ -97,6 +97,47 @@ export class SchedulesService {
         const slots: { doctorId: string; startTime: Date; endTime: Date; isAvailable: boolean }[] = [];
         const today = startOfDay(new Date());
 
+        const exactRanges = Array.isArray(timeRanges)
+            ? timeRanges.filter((range: any) => range.startDateTime && range.endDateTime)
+            : [];
+
+        if (exactRanges.length > 0) {
+            for (const range of exactRanges) {
+                let current = new Date(range.startDateTime);
+                const end = new Date(range.endDateTime);
+
+                while (current < end) {
+                    const next = new Date(current);
+                    next.setMinutes(next.getMinutes() + 30);
+                    if (next > end) break;
+
+                    slots.push({
+                        doctorId,
+                        startTime: current,
+                        endTime: next,
+                        isAvailable: true,
+                    });
+                    current = next;
+                }
+            }
+
+            const starts = slots.map(slot => slot.startTime);
+            const existingSlots = starts.length > 0
+                ? await this.prisma.consultationSlot.findMany({
+                    where: { doctorId, startTime: { in: starts } },
+                    select: { startTime: true },
+                })
+                : [];
+            const existingTimes = new Set(existingSlots.map(s => s.startTime.getTime()));
+            const newSlots = slots.filter(s => !existingTimes.has(s.startTime.getTime()));
+
+            if (newSlots.length > 0) {
+                await this.prisma.consultationSlot.createMany({ data: newSlots });
+            }
+
+            return { message: `Added ${newSlots.length} new slots.` };
+        }
+
         let limitDate = today;
         if (repeat === 'none') {
             limitDate = addDays(today, 7); // just the next 7 days (current week context)

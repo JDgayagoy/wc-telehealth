@@ -368,6 +368,7 @@ export default function DoctorSchedulePage() {
                 open={isAddModalOpen}
                 onOpenChange={setIsAddModalOpen}
                 onSuccess={() => { fetchSlots(); }}
+                selectedDate={selectedDate}
             />
 
             {/* FAB */}
