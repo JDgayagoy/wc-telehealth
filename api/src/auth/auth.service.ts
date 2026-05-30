@@ -31,32 +31,47 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-        const user = await this.usersService.create({
-            email: dto.email,
-            password: hashedPassword,
-            role: dto.role,
-        });
+        const birthday = new Date(dto.birthday);
 
-        await this.prisma.profile.create({
-            data: {
-                userId: user.id,
-                firstName: dto.firstName,
-                lastName: dto.lastName,
-                contactNumber: dto.contactNumber,
-                birthday: dto.birthday
-            }
-        })
+        if (Number.isNaN(birthday.getTime())) {
+            throw new BadRequestException('Invalid birthday');
+        }
 
-        if (dto.role === 'DOCTOR') {
-            await this.prisma.doctorProfile.create({
+        const user = await this.prisma.$transaction(async (tx) => {
+            const user = await tx.user.create({
+                data: {
+                    email: dto.email,
+                    password: hashedPassword,
+                    role: dto.role,
+                },
+            });
+
+            await tx.profile.create({
                 data: {
                     userId: user.id,
-                    specialization: dto.specialization || [],
-                    bio: dto.bio || '',
-                    yearsOfExperience: dto.yearsOfExperience || 0,
-                    licenseNumber: dto.licenseNumber || '',
+                    firstName: dto.firstName,
+                    lastName: dto.lastName,
+                    contactNumber: dto.contactNumber,
+                    birthday,
                 }
-            });
+            })
+
+            if (dto.role === 'DOCTOR') {
+                await tx.doctorProfile.create({
+                    data: {
+                        userId: user.id,
+                        specialization: dto.specialization || [],
+                        bio: dto.bio || '',
+                        yearsOfExperience: dto.yearsOfExperience || 0,
+                        licenseNumber: dto.licenseNumber || '',
+                    }
+                });
+            }
+
+            return user;
+        });
+
+        if (dto.role === 'DOCTOR') {
 
             // Auto-generate weekday slots for the next 30 days
             await this.schedulesService.generateDefaultSlots(user.id);

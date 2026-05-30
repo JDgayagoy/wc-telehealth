@@ -19,7 +19,7 @@ const registerSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     contactNumber: z.string().min(1, "Contact number is required"),
-    birthday: z.coerce.date(),
+    birthday: z.string().min(1, 'Birthday is required'),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -41,7 +41,8 @@ export default function DoctorRegisterPage() {
             toast.success('Doctor account created successfully');
             router.push('/login');
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Account creation failed');
+            const msg = error.response?.data?.message;
+            toast.error(Array.isArray(msg) ? msg[0] : (msg || 'Registration failed. Please try again.'));
         }
     };
 
@@ -130,4 +131,5 @@ export default function DoctorRegisterPage() {
         </div>
     );
 }
+
 

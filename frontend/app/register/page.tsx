@@ -11,11 +11,15 @@ import { Input } from "@/components/ui/input";
 
 const registerSchema = z.object({
     email: z.email(),
-    password: z.string()\n    .min(8, 'Password must be at least 8 characters')\n    .regex(/[a-z]/, 'Must contain a lowercase letter')\n    .regex(/[A-Z]/, 'Must contain an uppercase letter')\n    .regex(/[0-9]/, 'Must contain a number'),
+    password: z.string()
+        .min(8, 'Password must be at least 8 characters')
+        .regex(/[a-z]/, 'Must contain a lowercase letter')
+        .regex(/[A-Z]/, 'Must contain an uppercase letter')
+        .regex(/[0-9]/, 'Must contain a number'),
     firstName: z.string(),
     lastName: z.string(),
     contactNumber: z.string(),
-    birthday: z.coerce.date(),
+    birthday: z.string().min(1, 'Birthday is required'),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -36,9 +40,9 @@ export default function RegisterPage() {
             await axios.post('http://localhost:3001/auth/register', { ...data, role: 'PATIENT' });
             toast.success('Account created successfully');
             router.push('/login');
-        } catch (error) {
-            console.error('Account creation failed', error);
-            toast.error('Account creation failed');
+        } catch (error: any) {
+            const msg = error.response?.data?.message;
+            toast.error(Array.isArray(msg) ? msg[0] : (msg || 'Registration failed. Please try again.'));
         }
     };
 
@@ -127,4 +131,6 @@ export default function RegisterPage() {
         </div>
     );
 }
+
+
 
