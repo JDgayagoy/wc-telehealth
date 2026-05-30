@@ -149,63 +149,159 @@ export default function PatientAppointmentsPage() {
 
     const handlePrint = () => {
         if (!selected || !summary) return;
+        const refId = `#VT-${selected.id.slice(-6).toUpperCase()}`;
+        const doctorName = `Dr. ${selected.slot.doctor?.profile?.firstName ?? ''} ${selected.slot.doctor?.profile?.lastName ?? ''}`.trim();
+        const specialization = selected.slot.doctor?.doctorProfile?.specialization
+            ? (Array.isArray(selected.slot.doctor.doctorProfile.specialization)
+                ? selected.slot.doctor.doctorProfile.specialization.join(', ')
+                : selected.slot.doctor.doctorProfile.specialization)
+            : 'General Practitioner';
         const doc = `
 <!DOCTYPE html><html><head><title>Consultation Summary</title>
 <style>
-  body { font-family: Arial, sans-serif; color: #111; padding: 32px; max-width: 720px; margin: 0 auto; }
-  h1 { font-size: 20px; margin-bottom: 4px; }
-  .sub { color: #666; font-size: 12px; margin-bottom: 24px; }
-  .section { margin-bottom: 20px; }
-  .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 6px; }
-  .box { background: #f9f9f9; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.6; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: #f3f4f6; text-align: left; padding: 10px 12px; font-weight: 600; }
-  td { padding: 9px 12px; border-top: 1px solid #e5e7eb; }
-  .info-row { display: flex; gap: 32px; margin-bottom: 20px; font-size: 13px; }
-  .info-item strong { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 2px; }
-  hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; color: #111827; background: #fff; }
+  .page { max-width: 860px; margin: 0 auto; border: 1px solid #e5e7eb; }
+
+  /* Header */
+  .header { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 32px; border-bottom: 1px solid #e5e7eb; }
+  .header-title { font-size: 20px; font-weight: 700; color: #1d4ed8; }
+  .header-ref { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+  .header-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; background: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 999px; margin-top: 4px; display: inline-block; }
+
+  /* Identity grid */
+  .identity { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+  .identity-cell { padding: 20px 32px; }
+  .identity-cell + .identity-cell { border-left: 1px solid #e5e7eb; }
+  .cell-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #9ca3af; margin-bottom: 8px; }
+  .cell-value { font-size: 14px; font-weight: 600; color: #111827; line-height: 1.4; }
+  .cell-sub { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+  /* Content */
+  .content { padding: 28px 32px; }
+  .section { margin-bottom: 24px; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid #f3f4f6; margin-bottom: 12px; }
+  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #1d4ed8; }
+
+  /* Diagnosis box */
+  .diagnosis-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; }
+  .diagnosis-text { font-size: 18px; font-weight: 700; color: #1e3a8a; }
+  .treatment-badge { display: inline-block; background: #fff; border: 1px solid #bfdbfe; color: #1d4ed8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 4px; margin-top: 10px; }
+  .diagnosis-date { font-size: 11px; color: #9ca3af; margin-top: 8px; }
+
+  /* Notes */
+  .notes-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; font-size: 13px; color: #374151; line-height: 1.7; white-space: pre-line; }
+  .notes-signed { font-size: 10px; color: #9ca3af; margin-top: 8px; }
+
+  /* Reason box */
+  .reason-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; font-size: 13px; color: #374151; line-height: 1.6; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; font-size: 13px; }
+  thead tr { background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+  th { padding: 12px 20px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; }
+  td { padding: 14px 20px; border-top: 1px solid #f3f4f6; color: #374151; }
+  td strong { color: #111827; }
+  td .dosage { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+  /* Signature footer */
+  .sig-footer { display: flex; align-items: flex-end; justify-content: space-between; padding-top: 20px; border-top: 1px dashed #e5e7eb; margin-top: 4px; }
+  .sig-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; }
+  .sig-name { font-size: 13px; font-weight: 500; color: #374151; font-style: italic; margin-top: 2px; }
+  .sig-ts { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+  /* Page footer */
+  .page-footer { text-align: center; padding: 12px; background: #f9fafb; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
+
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style></head><body>
-  <h1>Consultation Summary</h1>
-  <p class="sub">
-    Ref #${selected.id.slice(-8).toUpperCase()} &nbsp;·&nbsp;
-    ${selected.slot.doctor?.doctorProfile?.specialization ? (Array.isArray(selected.slot.doctor.doctorProfile.specialization) ? selected.slot.doctor.doctorProfile.specialization.join(', ') : selected.slot.doctor.doctorProfile.specialization) : 'General Practitioner'}
-  </p>
-  <div class="info-row">
-    <div class="info-item"><strong>Doctor</strong>Dr. ${selected.slot.doctor?.profile?.firstName} ${selected.slot.doctor?.profile?.lastName}</div>
-    <div class="info-item"><strong>Date</strong>${format(new Date(selected.slot.startTime), 'MMMM d, yyyy')}</div>
-    <div class="info-item"><strong>Time</strong>${format(new Date(selected.slot.startTime), 'h:mm a')}</div>
-    <div class="info-item"><strong>Status</strong>Completed</div>
+<div class="page">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="header-title">Consultation Summary</div>
+      <div class="header-ref">Reference ID: ${refId}</div>
+    </div>
+    <span class="header-badge">Completed</span>
   </div>
-  <hr/>
-  ${selected.reason ? `<div class="section"><div class="label">Reason for Visit</div><div class="box">${selected.reason}</div></div>` : ''}
-  ${summary.medicalRecord ? `
-  <div class="section">
-    <div class="label">Diagnosis / Findings</div>
-    <div class="box">${summary.medicalRecord.diagnosis ?? '—'}</div>
+
+  <!-- Identity grid -->
+  <div class="identity">
+    <div class="identity-cell">
+      <div class="cell-label">Attending Physician</div>
+      <div class="cell-value">${doctorName}</div>
+      <div class="cell-sub">${specialization}</div>
+    </div>
+    <div class="identity-cell">
+      <div class="cell-label">Date &amp; Time</div>
+      <div class="cell-value">${format(new Date(selected.slot.startTime), 'MMMM d, yyyy')}</div>
+      <div class="cell-sub">${format(new Date(selected.slot.startTime), 'h:mm a')} — ${format(new Date(selected.slot.endTime), 'h:mm a')}</div>
+    </div>
+    <div class="identity-cell">
+      <div class="cell-label">Reason for Visit</div>
+      <div class="cell-value">${selected.reason || 'General Consultation'}</div>
+    </div>
   </div>
-  ${summary.medicalRecord.treatment && summary.medicalRecord.treatment !== 'See Clinical Notes' ? `
-  <div class="section">
-    <div class="label">Treatment</div>
-    <div class="box">${summary.medicalRecord.treatment}</div>
-  </div>` : ''}
-  ${summary.medicalRecord.consultationNotes ? `
-  <div class="section">
-    <div class="label">Clinical Notes</div>
-    <div class="box" style="white-space:pre-line">${summary.medicalRecord.consultationNotes}</div>
-    <div style="font-size:10px;color:#888;margin-top:6px;">Signed by Dr. ${selected.slot.doctor?.profile?.lastName?.toUpperCase()}</div>
-  </div>` : ''}` : ''}
-  ${summary.prescriptions?.length ? `
-  <div class="section">
-    <div class="label">Prescriptions</div>
-    <table>
-      <thead><tr><th>Medication</th><th>Dosage</th><th>Instructions</th></tr></thead>
-      <tbody>
-        ${summary.prescriptions.map((rx: any) => `<tr><td><strong>${rx.medication}</strong></td><td>${rx.dosage}</td><td>${rx.instructions ?? '—'}</td></tr>`).join('')}
-      </tbody>
-    </table>
-  </div>` : ''}
-  <hr/>
-  <p style="font-size:11px;color:#aaa;text-align:center;">Generated from WC Telehealth &nbsp;·&nbsp; ${format(new Date(), 'MMMM d, yyyy')}</p>
+
+  <!-- Content -->
+  <div class="content">
+    ${summary.medicalRecord ? `
+    <!-- Diagnosis -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Primary Diagnosis</div>
+      </div>
+      <div class="diagnosis-box">
+        <div class="diagnosis-text">${summary.medicalRecord.diagnosis ?? '—'}</div>
+        ${summary.medicalRecord.treatment && summary.medicalRecord.treatment !== 'See Clinical Notes'
+            ? `<div class="treatment-badge">Treatment: ${summary.medicalRecord.treatment}</div>`
+            : ''}
+      </div>
+    </div>
+
+    ${summary.medicalRecord.consultationNotes ? `
+    <!-- Clinical Notes -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Clinical Notes &amp; Observations</div>
+      </div>
+      <div class="notes-box">${summary.medicalRecord.consultationNotes}</div>
+      <div class="notes-signed">Signed by Dr. ${selected.slot.doctor?.profile?.lastName?.toUpperCase()}</div>
+    </div>` : ''}
+    ` : ''}
+
+    ${summary.prescriptions?.length ? `
+    <!-- Prescriptions -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Prescribed Medications</div>
+      </div>
+      <table>
+        <thead><tr><th>Medication &amp; Dosage</th><th>Instructions</th><th>Date</th></tr></thead>
+        <tbody>
+          ${summary.prescriptions.map((rx: any) => `
+          <tr>
+            <td><strong>${rx.medication}</strong><div class="dosage">${rx.dosage}</div></td>
+            <td>${rx.instructions ?? '—'}</td>
+            <td style="font-size:12px;color:#9ca3af;white-space:nowrap;">${rx.createdAt ? format(new Date(rx.createdAt), 'MMM d, yyyy') : '—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
+
+    <!-- Signature -->
+    <div class="sig-footer">
+      <div>
+        <div class="sig-label">Electronically Signed</div>
+        <div class="sig-name">Attending Physician</div>
+        <div class="sig-ts">Timestamp: ${format(new Date(selected.slot.startTime), 'yyyy-MM-dd HH:mm:ss')} UTC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page footer -->
+  <div class="page-footer">Generated from WC Telehealth &nbsp;·&nbsp; ${format(new Date(), 'MMMM d, yyyy')}</div>
+</div>
 </body></html>`;
         const w = window.open('', '_blank');
         if (!w) return;

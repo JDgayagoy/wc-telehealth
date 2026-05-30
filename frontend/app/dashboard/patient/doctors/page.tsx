@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from '@/lib/axios';
 import { Sparkles, Search, Star, ChevronRight, Calendar, User, ArrowRight } from 'lucide-react';
 import BookingModal from '@/components/booking/BookingModal';
+import { DoctorProfileModal } from '@/components/booking/DoctorProfileModal';
 import Link from 'next/link';
 
 const SPECIALIZATIONS = [
@@ -36,6 +37,7 @@ export default function DoctorDiscoveryPage() {
     const [aiLoading, setAiLoading] = useState(false);
     const [recommendedSpecs, setRecommendedSpecs] = useState<string[]>([]);
     const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+    const [profileDoctor, setProfileDoctor] = useState<Doctor | null>(null);
     const [showAiPanel, setShowAiPanel] = useState(false);
 
     const fetchDoctors = async (specialization?: string) => {
@@ -278,15 +280,16 @@ export default function DoctorDiscoveryPage() {
 
                                 {/* Actions */}
                                 <div className="flex gap-3">
-                                    <Link href={`/dashboard/patient/doctors/${doc.id}/book`} className="flex-1">
-                                        <button className="w-full bg-gray-100 text-gray-600 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition-colors">
-                                            Profile
-                                        </button>
-                                    </Link>
+                                    <button
+                                        onClick={() => setProfileDoctor(doc)}
+                                        className="flex-1 bg-gray-100 text-gray-600 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                                    >
+                                        Profile
+                                    </button>
                                     <button
                                         onClick={() => setSelectedDoctor(doc)}
                                         disabled={!doc.consultationSlots?.length}
-                                        className="flex-1 bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        className="flex-1 bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                                     >
                                         <Calendar size={14} /> Book
                                     </button>
@@ -333,6 +336,15 @@ export default function DoctorDiscoveryPage() {
                 onBooked={() => {
                     setSelectedDoctor(null);
                     fetchDoctors(activeFilter || undefined);
+                }}
+            />
+
+            <DoctorProfileModal
+                doctor={profileDoctor}
+                onClose={() => setProfileDoctor(null)}
+                onBook={() => {
+                    setSelectedDoctor(profileDoctor);
+                    setProfileDoctor(null);
                 }}
             />
         </div>
