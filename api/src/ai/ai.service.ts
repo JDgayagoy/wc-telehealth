@@ -1,8 +1,7 @@
+import 'dotenv/config';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import Anthropic from '@anthropic-ai/sdk';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const SPECIALIZATIONS = [
   'General Practitioner', 'Cardiologist', 'Dermatologist', 'Neurologist',
@@ -13,33 +12,34 @@ const SPECIALIZATIONS = [
 
 @Injectable()
 export class AiService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async recommend(symptoms: string) {
-    const message = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 300,
-      messages: [
-        {
-          role: 'user',
-          content: `A patient describes these symptoms: "${symptoms}"
-          
+    let recommendedSpecs: string[] = [];
+    try {
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '');
+      const model = genAI.getGenerativeModel({ model: '	gemini-2.5-pro' });
+      const result = await model.generateContent(
+        `A patient describes these symptoms: "${symptoms}"
+
 From this list of medical specializations, pick the TOP 3 most relevant ones:
 ${SPECIALIZATIONS.join(', ')}
 
-Respond ONLY with a JSON array of 3 strings, no explanation. Example: ["Cardiologist", "General Practitioner", "Pulmonologist"]`,
-        },
-      ],
-    });
-
-    const raw = message.content[0].type === 'text' ? message.content[0].text : '[]';
-    const recommendedSpecs: string[] = JSON.parse(raw.trim());
+Respond ONLY with a JSON array of 3 strings, no explanation. Example: ["Cardiologist", "General Practitioner", "Pulmonologist"]`
+      );
+      const raw = result.response.text().trim();
+      const match = raw.match(/\[.*\]/s);
+      recommendedSpecs = match ? JSON.parse(match[0]) : [];
+    } catch (e) {
+      console.error('AI Recommendation failed, falling back to empty recommendation:', e);
+      recommendedSpecs = [];
+    }
 
     const doctors = await this.prisma.user.findMany({
       where: {
         role: 'DOCTOR',
         doctorProfile: {
-          specialization: { in: recommendedSpecs },
+          specialization: { hasSome: recommendedSpecs },
         },
       },
       select: {
