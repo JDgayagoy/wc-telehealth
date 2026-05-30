@@ -3,38 +3,21 @@ import {
     UseInterceptors, UploadedFile, BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { mkdirSync } from 'fs';
-
-mkdirSync(join(process.cwd(), 'uploads', 'profiles'),   { recursive: true });
-mkdirSync(join(process.cwd(), 'uploads', 'signatures'),  { recursive: true });
+import { memoryStorage } from 'multer';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateDoctorProfileDto } from './dto/update-doctor-profile.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-
-const profileStorage = diskStorage({
-    destination: join(process.cwd(), 'uploads', 'profiles'),
-    filename: (_, file, cb) => {
-        const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        cb(null, `${unique}${extname(file.originalname)}`);
-    },
-});
-
-const signatureStorage = diskStorage({
-    destination: join(process.cwd(), 'uploads', 'signatures'),
-    filename: (_, file, cb) => {
-        const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        cb(null, `${unique}${extname(file.originalname)}`);
-    },
-});
+import { CloudinaryService } from './cloudinary.service';
 
 @Controller('profile')
 @UseGuards(JwtAuthGuard)
 export class ProfileController {
-    constructor(private profileService: ProfileService) { }
+    constructor(
+        private profileService: ProfileService,
+        private cloudinaryService: CloudinaryService,
+    ) { }
 
     @Post()
     create(@Req() req, @Body() dto: CreateProfileDto) {
@@ -53,7 +36,7 @@ export class ProfileController {
 
     @Post('upload-picture')
     @UseInterceptors(FileInterceptor('file', {
-        storage: profileStorage,
+        storage: memoryStorage(),
         limits: { fileSize: 5 * 1024 * 1024 },
         fileFilter: (_, file, cb) => {
             if (file.mimetype.startsWith('image/')) cb(null, true);
@@ -62,7 +45,8 @@ export class ProfileController {
     }))
     async uploadPicture(@Req() req, @UploadedFile() file: Express.Multer.File) {
         if (!file) throw new BadRequestException('No file uploaded');
-        const profilePictureUrl = `/uploads/profiles/${file.filename}`;
+        const upload = await this.cloudinaryService.uploadImage(file, 'wc-telehealth/profiles');
+        const profilePictureUrl = upload.secure_url;
         return this.profileService.update(req.user.id, { profilePictureUrl });
     }
 
@@ -78,7 +62,7 @@ export class ProfileController {
 
     @Post('doctor/upload-signature')
     @UseInterceptors(FileInterceptor('file', {
-        storage: signatureStorage,
+        storage: memoryStorage(),
         limits: { fileSize: 5 * 1024 * 1024 },
         fileFilter: (_, file, cb) => {
             if (file.mimetype.startsWith('image/')) cb(null, true);
@@ -87,7 +71,8 @@ export class ProfileController {
     }))
     async uploadSignature(@Req() req, @UploadedFile() file: Express.Multer.File) {
         if (!file) throw new BadRequestException('No file uploaded');
-        const signatureUrl = `/uploads/signatures/${file.filename}`;
+        const upload = await this.cloudinaryService.uploadImage(file, 'wc-telehealth/signatures');
+        const signatureUrl = upload.secure_url;
         return this.profileService.updateDoctorProfile(req.user.id, { signatureUrl });
     }
 }

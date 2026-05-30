@@ -227,7 +227,7 @@ export class AppointmentsService {
             doctor: {
               select: {
                 id: true,
-                profile: { select: { firstName: true, lastName: true } },
+                profile: { select: { firstName: true, lastName: true, profilePictureUrl: true } },
                 doctorProfile: { select: { specialization: true } },
               },
             },
