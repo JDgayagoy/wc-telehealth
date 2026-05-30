@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from '@/lib/axios';
@@ -84,7 +85,7 @@ export default function DoctorConsultationPage() {
             setLabRequests(res.data);
             setLabForms([{ testName: '', instructions: '' }]);
         } catch (e: any) {
-            alert(e.response?.data?.message || 'Failed to send lab request');
+            toast.error(e.response?.data?.message || 'Failed to send lab request');
         } finally {
             setSubmittingLab(false);
         }
@@ -95,7 +96,7 @@ export default function DoctorConsultationPage() {
             await axios.delete(`/lab-requests/${id}`);
             setLabRequests(prev => prev.filter(r => r.id !== id));
         } catch (e: any) {
-            alert(e.response?.data?.message || 'Cannot delete');
+            toast.error(e.response?.data?.message || 'Cannot delete');
         }
     };
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { useEffect, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import axios from '@/lib/axios';
@@ -87,27 +88,27 @@ function PatientHistoryModal({ appointment, onClose }: { appointment: Appointmen
         try {
             await axios.patch(`/appointments/${appointment.id}/notes`, { notes: localNotes });
             setEditNotes(false);
-        } catch { alert('Failed to save notes'); }
+        } catch { toast.error('Failed to save notes'); }
         finally { setSavingNotes(false); }
     };
 
     useEffect(() => { if (appointment) { setActiveTab('summary'); fetchAll(); } }, [appointment]);
 
     const handleAddRecord = async () => {
-        if (!noteDiagnosis || !appointment) return alert('Diagnosis is required');
+        if (!noteDiagnosis || !appointment) toast.error('Diagnosis is required'); return;
         try {
             await axios.post(`/patients/by-appointment/${appointment.id}/medical-records`, {
                 diagnosis: noteDiagnosis, treatment: noteTreatment, consultationNotes: noteNotes,
             });
-            alert('Record added');
+            toast.success('Record added');
             setNoteDiagnosis(''); setNoteTreatment(''); setNoteNotes('');
             fetchAll();
-        } catch { alert('Failed to add record'); }
+        } catch { toast.error('Failed to add record'); }
     };
 
     const handleAddPrescription = async () => {
         if (!appointment) return;
-        if (!rxList.every(rx => rx.medication.trim() && rx.dosage.trim())) return alert('Medication and Dosage required.');
+        if (!rxList.every(rx => rx.medication.trim() && rx.dosage.trim())) toast.error('Medication and Dosage required.'); return;
         try {
             const dtos = rxList.map(rx => ({
                 patientId: appointment.patient.id,
@@ -120,10 +121,10 @@ function PatientHistoryModal({ appointment, onClose }: { appointment: Appointmen
                 ].filter(Boolean).join(' | ') || 'No additional instructions',
             }));
             await axios.post('/prescriptions/batch', dtos);
-            alert('Prescriptions added');
+            toast.success('Prescriptions added');
             setRxList([{ medication: '', dosage: '', frequency: '', duration: '', notes: '' }]);
             fetchAll();
-        } catch { alert('Failed to add prescriptions'); }
+        } catch { toast.error('Failed to add prescriptions'); }
     };
 
     const addRxRow = () => setRxList([...rxList, { medication: '', dosage: '', frequency: '', duration: '', notes: '' }]);
@@ -561,7 +562,7 @@ function LabRequestModal({
             setRequests(r.data);
             onCreated();
         } catch (e: any) {
-            alert(e.response?.data?.message || 'Failed to create lab request');
+            toast.error(e.response?.data?.message || 'Failed to create lab request');
         } finally {
             setSubmitting(false);
         }
@@ -572,7 +573,7 @@ function LabRequestModal({
             await axios.delete(`/lab-requests/${id}`);
             setRequests(prev => prev.filter(r => r.id !== id));
         } catch (e: any) {
-            alert(e.response?.data?.message || 'Cannot delete');
+            toast.error(e.response?.data?.message || 'Cannot delete');
         }
     };
 
@@ -852,7 +853,7 @@ export default function DoctorAppointmentsPage() {
         try {
             await axios.patch(`/appointments/${id}/confirm`);
             setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'CONFIRMED' } : a));
-        } catch (err: any) { alert(err.response?.data?.message || 'Failed to confirm'); }
+        } catch (err: any) { toast.error(err.response?.data?.message || 'Failed to confirm'); }
         finally { setActioning(null); }
     };
 
@@ -863,7 +864,7 @@ export default function DoctorAppointmentsPage() {
         try {
             await axios.patch(`/appointments/${id}/reject`);
             setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'CANCELLED' } : a));
-        } catch (err: any) { alert(err.response?.data?.message || 'Failed to decline'); }
+        } catch (err: any) { toast.error(err.response?.data?.message || 'Failed to decline'); }
         finally { setActioning(null); }
     };
 
@@ -874,7 +875,7 @@ export default function DoctorAppointmentsPage() {
         try {
             await axios.patch(`/appointments/${id}/approve-cancellation`);
             setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'CANCELLED' } : a));
-        } catch (err: any) { alert(err.response?.data?.message || 'Failed'); }
+        } catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
         finally { setActioning(null); }
     };
 
@@ -885,7 +886,7 @@ export default function DoctorAppointmentsPage() {
         try {
             await axios.patch(`/appointments/${id}/reject-cancellation`);
             setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'CONFIRMED' } : a));
-        } catch (err: any) { alert(err.response?.data?.message || 'Failed'); }
+        } catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
         finally { setActioning(null); }
     };
 
@@ -895,7 +896,7 @@ export default function DoctorAppointmentsPage() {
         try {
             await axios.patch(`/appointments/${id}/approve-reschedule`);
             setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'CONFIRMED' } : a));
-        } catch (err: any) { alert(err.response?.data?.message || 'Failed'); }
+        } catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
         finally { setActioning(null); }
     };
 
@@ -906,7 +907,7 @@ export default function DoctorAppointmentsPage() {
         try {
             await axios.patch(`/appointments/${id}/reject-reschedule`);
             setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'CONFIRMED' } : a));
-        } catch (err: any) { alert(err.response?.data?.message || 'Failed'); }
+        } catch (err: any) { toast.error(err.response?.data?.message || 'Failed'); }
         finally { setActioning(null); }
     };
 

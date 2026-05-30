@@ -5,12 +5,18 @@ export class CreateHistoryDto {
     condition: string;
 
     @IsString()
-    description: string;
+    @IsOptional()
+    description?: string;
 
     @IsBoolean()
-    isActive: boolean;
+    @IsOptional()
+    isActive?: boolean;
+
+    @IsBoolean()
+    @IsOptional()
+    isAllergy?: boolean;
 
     @IsDateString()
     @IsOptional()
-    diagnosedAt: Date;
+    diagnosedAt?: Date;
 }
