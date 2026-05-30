@@ -7,7 +7,7 @@ import { apiUrl } from '@/lib/api-url';
 import { format, isFuture, isAfter, subMinutes } from 'date-fns';
 import {
     Video, Calendar as CalendarIcon, Clock, User, X, RefreshCw,
-    FileText, ClipboardList, Pill, StickyNote,
+    FileText, ClipboardList, Pill, StickyNote, Printer,
     CheckCircle2, Timer, RotateCcw, Ban, ChevronLeft, ChevronRight,
     FlaskConical, Upload, ExternalLink,
 } from 'lucide-react';
@@ -146,6 +146,74 @@ export default function PatientAppointmentsPage() {
     const selected = appointments.find(a => a.id === selectedId) ?? null;
     const isUpcomingAppt = selected ? upcoming.some(a => a.id === selected.id) : false;
     const isJoinable = (startTime: string) => isAfter(new Date(), subMinutes(new Date(startTime), 30));
+
+    const handlePrint = () => {
+        if (!selected || !summary) return;
+        const doc = `
+<!DOCTYPE html><html><head><title>Consultation Summary</title>
+<style>
+  body { font-family: Arial, sans-serif; color: #111; padding: 32px; max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .sub { color: #666; font-size: 12px; margin-bottom: 24px; }
+  .section { margin-bottom: 20px; }
+  .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 6px; }
+  .box { background: #f9f9f9; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.6; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f3f4f6; text-align: left; padding: 10px 12px; font-weight: 600; }
+  td { padding: 9px 12px; border-top: 1px solid #e5e7eb; }
+  .info-row { display: flex; gap: 32px; margin-bottom: 20px; font-size: 13px; }
+  .info-item strong { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 2px; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+</style></head><body>
+  <h1>Consultation Summary</h1>
+  <p class="sub">
+    Ref #${selected.id.slice(-8).toUpperCase()} &nbsp;·&nbsp;
+    ${selected.slot.doctor?.doctorProfile?.specialization ? (Array.isArray(selected.slot.doctor.doctorProfile.specialization) ? selected.slot.doctor.doctorProfile.specialization.join(', ') : selected.slot.doctor.doctorProfile.specialization) : 'General Practitioner'}
+  </p>
+  <div class="info-row">
+    <div class="info-item"><strong>Doctor</strong>Dr. ${selected.slot.doctor?.profile?.firstName} ${selected.slot.doctor?.profile?.lastName}</div>
+    <div class="info-item"><strong>Date</strong>${format(new Date(selected.slot.startTime), 'MMMM d, yyyy')}</div>
+    <div class="info-item"><strong>Time</strong>${format(new Date(selected.slot.startTime), 'h:mm a')}</div>
+    <div class="info-item"><strong>Status</strong>Completed</div>
+  </div>
+  <hr/>
+  ${selected.reason ? `<div class="section"><div class="label">Reason for Visit</div><div class="box">${selected.reason}</div></div>` : ''}
+  ${summary.medicalRecord ? `
+  <div class="section">
+    <div class="label">Diagnosis / Findings</div>
+    <div class="box">${summary.medicalRecord.diagnosis ?? '—'}</div>
+  </div>
+  ${summary.medicalRecord.treatment && summary.medicalRecord.treatment !== 'See Clinical Notes' ? `
+  <div class="section">
+    <div class="label">Treatment</div>
+    <div class="box">${summary.medicalRecord.treatment}</div>
+  </div>` : ''}
+  ${summary.medicalRecord.consultationNotes ? `
+  <div class="section">
+    <div class="label">Clinical Notes</div>
+    <div class="box" style="white-space:pre-line">${summary.medicalRecord.consultationNotes}</div>
+    <div style="font-size:10px;color:#888;margin-top:6px;">Signed by Dr. ${selected.slot.doctor?.profile?.lastName?.toUpperCase()}</div>
+  </div>` : ''}` : ''}
+  ${summary.prescriptions?.length ? `
+  <div class="section">
+    <div class="label">Prescriptions</div>
+    <table>
+      <thead><tr><th>Medication</th><th>Dosage</th><th>Instructions</th></tr></thead>
+      <tbody>
+        ${summary.prescriptions.map((rx: any) => `<tr><td><strong>${rx.medication}</strong></td><td>${rx.dosage}</td><td>${rx.instructions ?? '—'}</td></tr>`).join('')}
+      </tbody>
+    </table>
+  </div>` : ''}
+  <hr/>
+  <p style="font-size:11px;color:#aaa;text-align:center;">Generated from WC Telehealth &nbsp;·&nbsp; ${format(new Date(), 'MMMM d, yyyy')}</p>
+</body></html>`;
+        const w = window.open('', '_blank');
+        if (!w) return;
+        w.document.write(doc);
+        w.document.close();
+        w.focus();
+        w.print();
+    };
 
     if (loading) return (
         <div className="flex h-[60vh] items-center justify-center">
@@ -300,7 +368,18 @@ export default function PatientAppointmentsPage() {
                                         {' · '}Ref #{selected.id.slice(-8).toUpperCase()}
                                     </p>
                                 </div>
-                                <StatusBadge status={selected.status} />
+                                <div className="flex items-center gap-2">
+                                    <StatusBadge status={selected.status} />
+                                    {selected.status === 'COMPLETED' && summary && (
+                                        <button
+                                            onClick={handlePrint}
+                                            title="Print consultation summary"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                                        >
+                                            <Printer size={13} /> Print
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="p-6 space-y-7">
