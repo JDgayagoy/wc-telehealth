@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from '@/lib/axios';
@@ -57,7 +58,7 @@ export default function BookingPage() {
             await axios.post('/appointments', { slotId: selectedSlot, reason });
             setSuccess(true);
         } catch (e: any) {
-            alert(e.response?.data?.message ?? 'Booking failed');
+            toast.error(e.response?.data?.message ?? 'Booking failed');
         } finally {
             setBooking(false);
         }

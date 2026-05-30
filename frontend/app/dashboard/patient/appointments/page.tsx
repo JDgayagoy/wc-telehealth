@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import axios from '@/lib/axios';
 import { format, isFuture, isAfter, subMinutes } from 'date-fns';
@@ -108,7 +109,7 @@ export default function PatientAppointmentsPage() {
             });
             setLabRequests(prev => prev.map(r => r.id === labRequestId ? { ...r, status: 'UPLOADED', result: res.data.result } : r));
         } catch (e: any) {
-            alert(e.response?.data?.message || 'Upload failed');
+            toast.error(e.response?.data?.message || 'Upload failed');
         } finally {
             setUploadingLabId(null);
         }
@@ -122,7 +123,7 @@ export default function PatientAppointmentsPage() {
             await fetchAppointments();
             setSelectedId(null);
         } catch (e: any) {
-            alert(e.response?.data?.message || 'Failed to cancel');
+            toast.error(e.response?.data?.message || 'Failed to cancel');
         } finally {
             setCancelling(false);
         }
