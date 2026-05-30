@@ -38,13 +38,19 @@ export class DoctorsService {
         await this.prisma.consultationSlot.createMany({ data: slots });
     }
 
+    private computeRating(ratings: { rating: number }[]) {
+        if (!ratings.length) return { avgRating: null, ratingCount: 0 };
+        const avg = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
+        return { avgRating: Math.round(avg * 10) / 10, ratingCount: ratings.length };
+    }
+
     async findAll(specialization?: string) {
-        return this.prisma.user.findMany({
+        const doctors = await this.prisma.user.findMany({
             where: {
                 role: 'DOCTOR',
                 ...(specialization && {
                     doctorProfile: {
-                        specialization: { contains: specialization, mode: 'insensitive' },
+                        specialization: { hasSome: [specialization] },
                     },
                 }),
             },
@@ -64,12 +70,18 @@ export class DoctorsService {
                     where: { isAvailable: true, startTime: { gte: new Date() } },
                     orderBy: { startTime: 'asc' },
                 },
+                doctorRatings: { select: { rating: true } },
             },
         });
+
+        return doctors.map(({ doctorRatings, ...doc }) => ({
+            ...doc,
+            ...this.computeRating(doctorRatings),
+        }));
     }
 
     async findOne(id: string) {
-        return this.prisma.user.findUnique({
+        const doctor = await this.prisma.user.findUnique({
             where: { id },
             select: {
                 id: true,
@@ -79,8 +91,24 @@ export class DoctorsService {
                     where: { isAvailable: true, startTime: { gte: new Date() } },
                     orderBy: { startTime: 'asc' },
                 },
+                doctorRatings: {
+                    select: {
+                        rating: true, review: true, createdAt: true,
+                        patient: { select: { profile: { select: { firstName: true, lastName: true, profilePictureUrl: true } } } },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    take: 10,
+                },
             },
         });
+
+        if (!doctor) return null;
+        const { doctorRatings, ...rest } = doctor;
+        return {
+            ...rest,
+            ...this.computeRating(doctorRatings),
+            recentReviews: doctorRatings,
+        };
     }
 
     async getSlots(doctorId: string) {

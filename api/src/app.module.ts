@@ -13,9 +13,11 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
 import { AiModule } from './ai/ai.module';
+import { LabRequestsModule } from './lab-requests/lab-requests.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, DoctorsModule, PatientsModule, AppointmentsModule, SchedulesModule, PrescriptionsModule, ConsultationsModule, NotificationsModule, PrismaModule, ProfileModule, AiModule],
+  imports: [AuthModule, UsersModule, DoctorsModule, PatientsModule, AppointmentsModule, SchedulesModule, PrescriptionsModule, ConsultationsModule, NotificationsModule, PrismaModule, ProfileModule, AiModule, LabRequestsModule, MessagesModule],
   controllers: [AppController],
   providers: [AppService],
 })
