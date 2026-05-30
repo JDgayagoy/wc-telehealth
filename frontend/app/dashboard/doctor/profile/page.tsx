@@ -109,6 +109,11 @@ export default function DoctorProfilePage() {
     const handlePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image must be under 5MB');
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
         setUploadingPic(true);
         try {
             const fd = new FormData();
