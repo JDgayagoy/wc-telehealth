@@ -37,7 +37,7 @@ export function PrescriptionPanel({ appointmentId, patientId, onClose }: Prescri
 
     const handleSubmit = async () => {
         const isValid = rxList.every(rx => rx.medication.trim() && rx.dosage.trim());
-        if (!isValid) toast.error('Medication Name and Dosage are required for all entries.'); return;
+        if (!isValid) { toast.error('Medication Name and Dosage are required for all entries.'); return; }
 
         setSubmitting(true);
         try {

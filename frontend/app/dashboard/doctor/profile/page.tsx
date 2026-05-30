@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from '@/lib/axios';
 import { apiUrl } from '@/lib/api-url';
+import { ProfileAvatar } from '@/components/ui/ProfileAvatar';
 import { format, differenceInYears } from 'date-fns';
 import {
     User, Phone, Edit2, X, Save, Stethoscope,
@@ -253,9 +254,7 @@ export default function DoctorProfilePage() {
                         onClick={() => !uploadingPic && fileInputRef.current?.click()}
                         className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center cursor-pointer group relative"
                     >
-                        {picUrl
-                            ? <img src={picUrl} alt="" className="w-full h-full object-cover" />
-                            : <User size={52} className="text-gray-300" />}
+                        <ProfileAvatar src={profile?.profilePictureUrl} iconSize={52} />
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
                             {uploadingPic
                                 ? <Loader2 size={28} className="text-white animate-spin" />

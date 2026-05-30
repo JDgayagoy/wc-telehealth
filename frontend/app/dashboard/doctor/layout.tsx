@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import axios from '@/lib/axios';
 import { getRoleFromToken } from '@/lib/auth';
 import { Activity, LayoutDashboard, Calendar as CalendarIcon, Clock, User as UserIcon, LogOut, Menu, X, MessageSquare } from 'lucide-react';
+import { ProfileAvatar } from '@/components/ui/ProfileAvatar';
 import { NotificationsProvider, useNotifications } from '@/components/notifications/NotificationsProvider';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { DoctorOnboardingModal } from '@/components/onboarding/DoctorOnboardingModal';
@@ -127,11 +128,7 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
         <div className="p-4 border-t border-gray-100 shrink-0">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-              {profile?.profilePictureUrl ? (
-                <img src={profile.profilePictureUrl} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <UserIcon size={20} className="text-gray-400" />
-              )}
+              <ProfileAvatar src={profile?.profilePictureUrl} iconSize={20} />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-gray-900 truncate">
