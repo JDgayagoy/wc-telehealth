@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Figtree, Noto_Sans, Poppins } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -38,7 +39,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("h-full antialiased", figtree.variable, notoSans.variable, poppins.variable, "font-sans")}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        {children}
+        <Toaster position="top-right" richColors closeButton duration={4000} />
+      </body>
     </html>
   );
 }
