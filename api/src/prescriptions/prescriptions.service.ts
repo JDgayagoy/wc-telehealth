@@ -21,6 +21,19 @@ export class PrescriptionsService {
         });
     }
 
+    async batchCreate(doctorId: string, dtos: CreatePrescriptionDto[]) {
+        const data = dtos.map(dto => ({
+            doctorId,
+            patientId: dto.patientId,
+            medication: dto.medication,
+            dosage: dto.dosage,
+            instructions: dto.instructions,
+            ...(dto.appointmentId ? { appointmentId: dto.appointmentId } : {}),
+        }));
+        await this.prisma.prescription.createMany({ data });
+        return { message: 'Prescriptions added successfully' };
+    }
+
     findByPatient(patientId: string) {
         return this.prisma.prescription.findMany({
             where: { patientId },

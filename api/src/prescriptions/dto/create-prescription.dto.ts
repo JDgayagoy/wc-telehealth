@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreatePrescriptionDto {
     @IsString()
@@ -12,4 +12,8 @@ export class CreatePrescriptionDto {
 
     @IsString()
     instructions: string;
+
+    @IsOptional()
+    @IsString()
+    appointmentId?: string;
 }
