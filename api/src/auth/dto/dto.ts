@@ -5,7 +5,8 @@ import {
     IsString,
     MinLength,
     IsOptional,
-    IsNumber
+    IsNumber,
+    IsArray
 } from 'class-validator';
 
 export enum Role {
@@ -37,8 +38,9 @@ export class RegisterDto {
     role: Role;
 
     @IsOptional()
-    @IsString()
-    specialization?: string;
+    @IsArray()
+    @IsString({ each: true })
+    specialization?: string[];
 
     @IsOptional()
     @IsString()
