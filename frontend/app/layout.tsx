@@ -23,6 +23,7 @@ const poppins = Poppins({
   display: 'swap',
 });
 
+
 export const metadata: Metadata = {
   title: "WC Telehealth | Professional Healthcare",
   description: "Accessible, high-quality virtual healthcare for everyone.",
