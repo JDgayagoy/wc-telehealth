@@ -16,4 +16,28 @@ export class CreateProfileDto {
     @IsString()
     @IsOptional()
     profilePictureUrl?: string;
+
+    @IsString()
+    @IsOptional()
+    gender?: string;
+
+    @IsString()
+    @IsOptional()
+    address?: string;
+
+    @IsString()
+    @IsOptional()
+    bloodType?: string;
+
+    @IsString()
+    @IsOptional()
+    emergencyContactName?: string;
+
+    @IsString()
+    @IsOptional()
+    emergencyContactRelation?: string;
+
+    @IsString()
+    @IsOptional()
+    emergencyContactPhone?: string;
 }

@@ -11,6 +11,7 @@ import { UsersService } from "../users/users.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/dto";
 import { PrismaService } from "src/prisma/prisma.service";
+import { SchedulesService } from "../schedules/schedules.service";
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,7 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private prisma: PrismaService,
+        private schedulesService: SchedulesService,
     ) { }
 
     async register(dto: RegisterDto) {
@@ -49,12 +51,15 @@ export class AuthService {
             await this.prisma.doctorProfile.create({
                 data: {
                     userId: user.id,
-                    specialization: dto.specialization || '',
+                    specialization: dto.specialization || [],
                     bio: dto.bio || '',
                     yearsOfExperience: dto.yearsOfExperience || 0,
                     licenseNumber: dto.licenseNumber || '',
                 }
-            })
+            });
+
+            // Auto-generate weekday slots for the next 30 days
+            await this.schedulesService.generateDefaultSlots(user.id);
         }
 
         return {

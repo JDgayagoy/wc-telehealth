@@ -7,10 +7,12 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 import { UsersModule } from '../users/users.module';
+import { SchedulesModule } from '../schedules/schedules.module';
 
 @Module({
     imports: [
         UsersModule,
+        SchedulesModule,
         PassportModule,
         JwtModule.register({
             secret: 'super-secret-key',
