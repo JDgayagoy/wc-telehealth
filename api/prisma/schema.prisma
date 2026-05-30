@@ -31,6 +31,11 @@ model User {
   doctorMedicalRecords  MedicalRecord[] @relation("DoctorMedicalRecords")
   patientPrescriptions  Prescription[]  @relation("PatientPrescriptions")
   doctorPrescriptions   Prescription[]  @relation("DoctorPrescriptions")
+  notifications         Notification[]
+  patientRatings        DoctorRating[]  @relation("PatientRatings")
+  doctorRatings         DoctorRating[]  @relation("DoctorRatings")
+  doctorLabRequests     LabRequest[]    @relation("DoctorLabRequests")
+  sentMessages          Message[]       @relation("SentMessages")
 }
 
 model Profile {
@@ -44,6 +49,14 @@ model Profile {
   contactNumber String
 
   profilePictureUrl String?
+
+  gender    String?
+  address   String?
+  bloodType String?
+
+  emergencyContactName     String?
+  emergencyContactRelation String?
+  emergencyContactPhone    String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -67,6 +80,7 @@ model MedicalHistory {
   condition String
   description String?
   isActive  Boolean @default(true)
+  isAllergy Boolean @default(false)
   diagnosedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -77,12 +91,14 @@ model DoctorProfile {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
 
-  specialization String
+  specialization String[]
   bio String
   licenseNumber String
   yearsOfExperience Int
 
   profilePictureUrl String?
+  signatureUrl      String?
+  workExperience    Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -111,9 +127,16 @@ model Appointment {
   slotId    String
   slot      ConsultationSlot @relation(fields: [slotId], references: [id])
 
+  requestedSlotId String?
+
   status    AppointmentStatus @default(PENDING)
   reason    String?
   notes     String?
+  rating    DoctorRating?
+  medicalRecords MedicalRecord[]
+  prescriptions  Prescription[]
+  labRequests    LabRequest[]
+  messages       Message[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -125,14 +148,18 @@ enum AppointmentStatus {
   CANCELLED
   COMPLETED
   RESCHEDULED
+  RESCHEDULE_PENDING
+  CANCEL_PENDING
 }
 
 model MedicalRecord {
-  id                String   @id @default(uuid())
+  id                String       @id @default(uuid())
   patientId         String
-  patient           User     @relation("PatientMedicalRecords", fields: [patientId], references: [id])
+  patient           User         @relation("PatientMedicalRecords", fields: [patientId], references: [id])
   doctorId          String
-  doctor            User     @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
+  doctor            User         @relation("DoctorMedicalRecords", fields: [doctorId], references: [id])
+  appointmentId     String?
+  appointment       Appointment? @relation(fields: [appointmentId], references: [id])
 
   diagnosis         String
   treatment         String?
@@ -142,15 +169,119 @@ model MedicalRecord {
 }
 
 model Prescription {
-  id           String   @id @default(uuid())
-  patientId    String
-  patient      User     @relation("PatientPrescriptions", fields: [patientId], references: [id])
-  doctorId     String
-  doctor       User     @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       User         @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  doctorId      String
+  doctor        User         @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
 
-  medication   String
-  dosage       String
-  instructions String
+  medication    String
+  dosage        String
+  instructions  String
 
-  createdAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  metadata  String?
+
+  createdAt DateTime @default(now())
+}
+
+model MessageThreadArchive {
+  id            String   @id @default(uuid())
+  appointmentId String
+  userId        String
+  archivedAt    DateTime @default(now())
+
+  @@unique([appointmentId, userId])
+}
+
+model MessageThreadClose {
+  id            String   @id @default(uuid())
+  appointmentId String   @unique
+  closedBy      String
+  closedAt      DateTime @default(now())
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  SYSTEM
+}
+
+model Message {
+  id            String      @id @default(uuid())
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  senderId      String
+  sender        User        @relation("SentMessages", fields: [senderId], references: [id])
+
+  content       String?
+  fileUrl       String?
+  fileName      String?
+  fileType      String?
+  type          MessageType @default(TEXT)
+  readAt        DateTime?
+
+  createdAt     DateTime    @default(now())
+}
+
+enum LabRequestStatus {
+  PENDING
+  UPLOADED
+  REVIEWED
+}
+
+model LabRequest {
+  id            String           @id @default(uuid())
+  appointmentId String
+  appointment   Appointment      @relation(fields: [appointmentId], references: [id])
+  doctorId      String
+  doctor        User             @relation("DoctorLabRequests", fields: [doctorId], references: [id])
+
+  testName      String
+  instructions  String?
+  status        LabRequestStatus @default(PENDING)
+
+  result        LabResult?
+
+  createdAt     DateTime         @default(now())
+}
+
+model LabResult {
+  id           String     @id @default(uuid())
+  labRequestId String     @unique
+  labRequest   LabRequest @relation(fields: [labRequestId], references: [id])
+
+  fileUrl      String
+  fileName     String
+  fileType     String
+
+  uploadedAt   DateTime   @default(now())
+}
+
+model DoctorRating {
+  id            String      @id @default(uuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  patientId     String
+  patient       User        @relation("PatientRatings", fields: [patientId], references: [id])
+  doctorId      String
+  doctor        User        @relation("DoctorRatings", fields: [doctorId], references: [id])
+
+  rating        Int
+  review        String?
+
+  createdAt     DateTime    @default(now())
 }
