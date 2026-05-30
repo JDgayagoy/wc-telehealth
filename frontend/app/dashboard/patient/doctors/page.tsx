@@ -239,7 +239,7 @@ export default function DoctorDiscoveryPage() {
                                             <h4 className="text-lg font-bold text-gray-900 group-hover:text-blue-700 transition-colors leading-tight">
                                                 Dr. {doc.profile?.firstName} {doc.profile?.lastName}
                                             </h4>
-                                            {doc.avgRating !== null ? (
+                                            {doc.avgRating != null ? (
                                                 <span className="flex items-center gap-0.5 text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ml-2">
                                                     <Star size={11} className="fill-amber-500 text-amber-500" /> {doc.avgRating.toFixed(1)}
                                                     <span className="text-amber-400 font-normal ml-0.5">({doc.ratingCount})</span>
