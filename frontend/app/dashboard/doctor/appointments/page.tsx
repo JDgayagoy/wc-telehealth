@@ -95,7 +95,10 @@ function PatientHistoryModal({ appointment, onClose }: { appointment: Appointmen
     useEffect(() => { if (appointment) { setActiveTab('summary'); fetchAll(); } }, [appointment]);
 
     const handleAddRecord = async () => {
-        if (!noteDiagnosis || !appointment) toast.error('Diagnosis is required'); return;
+        if (!noteDiagnosis || !appointment) {
+            toast.error('Diagnosis is required');
+            return;
+        }
         try {
             await axios.post(`/patients/by-appointment/${appointment.id}/medical-records`, {
                 diagnosis: noteDiagnosis, treatment: noteTreatment, consultationNotes: noteNotes,
@@ -108,7 +111,10 @@ function PatientHistoryModal({ appointment, onClose }: { appointment: Appointmen
 
     const handleAddPrescription = async () => {
         if (!appointment) return;
-        if (!rxList.every(rx => rx.medication.trim() && rx.dosage.trim())) toast.error('Medication and Dosage required.'); return;
+        if (!rxList.every(rx => rx.medication.trim() && rx.dosage.trim())) {
+            toast.error('Medication and Dosage required.');
+            return;
+        }
         try {
             const dtos = rxList.map(rx => ({
                 patientId: appointment.patient.id,
